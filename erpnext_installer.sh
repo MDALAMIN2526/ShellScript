@@ -146,8 +146,10 @@ bench --site cpm.com install-app erpnext
 if [ "$bench_version" = "2" ]; then
     bench get-app payments
     bench get-app hrms --branch version-14
+    bench get-app https://github.com/MDALAMIN2526/WooCommerceConnector.git
     bench --site cpm.com install-app payments
     bench --site cpm.com install-app hrms
+    bench --site cpm.com install-app woocommerceconnector
 fi
 bench start
 
