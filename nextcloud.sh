@@ -27,7 +27,10 @@ sudo rm -r latest.tar.bz2
 sudo chown -R www-data:www-data /var/www/nextcloud
 # Get Server Name from User
 read -p "Enter the server name or domain (e.g., yourdomain.com): " server_name
-
+# Set default server name if user input is empty
+if [ -z "$server_name" ]; then
+    server_name="127.0.0.1"
+fi
 # Configure Apache
 sudo tee /etc/apache2/sites-available/nextcloud.conf > /dev/null <<EOF
 <VirtualHost *:80>
