@@ -25,12 +25,14 @@ sudo rm -r latest.tar.bz2
 
 # Set Permissions
 sudo chown -R www-data:www-data /var/www/nextcloud
+# Get Server Name from User
+read -p "Enter the server name or domain (e.g., yourdomain.com): " server_name
 
 # Configure Apache
 sudo tee /etc/apache2/sites-available/nextcloud.conf > /dev/null <<EOF
 <VirtualHost *:80>
     DocumentRoot /var/www/nextcloud/
-    ServerName 127.0.0.1
+    ServerName $server_name
 
     <Directory /var/www/nextcloud/>
         Require all granted
@@ -42,7 +44,7 @@ sudo tee /etc/apache2/sites-available/nextcloud.conf > /dev/null <<EOF
     </Directory>
 </VirtualHost>
 <VirtualHost *:443>
-    ServerName yourdomain.com
+    ServerName $server_name
     DocumentRoot /var/www/nextcloud
 
     SSLEngine on
@@ -57,4 +59,4 @@ sudo a2ensite nextcloud.conf
 sudo a2enmod rewrite
 sudo systemctl restart apache2
 
-echo "Installation complete. Open a web browser and go to http://your_domain_or_ip/nextcloud to finish the setup."
+echo "Installation complete. Open a web browser and go to http://$server_name/nextcloud to finish the setup."
