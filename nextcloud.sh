@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Update Packages
-sudo apt update
-sudo apt upgrade
+sudo apt update -y
+sudo apt upgrade -y
 
 # Install LAMP Stack
-sudo apt install apache2 mysql-server php libapache2-mod-php php-mysql php-xml php-mbstring php-intl php-zip php-gd php-curl
+sudo apt install apache2 mysql-server php libapache2-mod-php php-mysql php-xml php-mbstring php-intl php-zip php-gd php-curl -y
 # Secure MySQL Installation
 sudo mysql_secure_installation
 # Create MySQL Database
@@ -20,11 +20,11 @@ EOF
 # Download and Extract Nextcloud
 cd /var/www/
 sudo wget https://download.nextcloud.com/server/releases/latest.tar.bz2
-sudo tar -xjvf latest.tar.bz2
+sudo tar -xjvf latest.tar.bz2 -y
 sudo rm -r latest.tar.bz2
 
 # Set Permissions
-sudo chown -R www-data:www-data /var/www/nextcloud
+sudo chown -R www-data:www-data /var/www/nextcloud 
 # Get Server Name from User
 read -p "Enter the server name or domain (e.g., yourdomain.com): " server_name
 # Set default server name if user input is empty
@@ -58,8 +58,8 @@ sudo tee /etc/apache2/sites-available/nextcloud.conf > /dev/null <<EOF
 </VirtualHost>
 EOF
 
-sudo a2ensite nextcloud.conf
-sudo a2enmod rewrite
-sudo systemctl restart apache2
+sudo a2ensite nextcloud.conf -y
+sudo a2enmod rewrite -y
+sudo systemctl restart apache2 -y
 
 echo "Installation complete. Open a web browser and go to http://$server_name/nextcloud to finish the setup."
