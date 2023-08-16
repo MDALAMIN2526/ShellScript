@@ -3,11 +3,22 @@
 sudo apt update -y
 sudo apt upgrade -y
 
-# STEP 1 Install git
-sudo apt-get install git -y
+# Function to check if a package is installed
+is_installed() {
+    dpkg -l | grep -E "^ii\s+$1" &> /dev/null
+}
 
-# STEP 2 Install python-dev
-sudo apt-get install python3-dev -y
+# Check and install git
+if ! is_installed git; then
+    sudo apt-get update -y
+    sudo apt-get install git -y
+fi
+
+# Check and install python-dev
+if ! is_installed python3-dev; then
+    sudo apt-get update -y
+    sudo apt-get install python3-dev -y
+fi
 
 # STEP 3 Install setuptools and pip
 sudo apt-get install python3-setuptools python3-pip -y
@@ -26,10 +37,13 @@ elif [[ "$python_version" == "3.10"* ]]; then
     sudo apt install python3.10-venv -y
 fi
 
-# STEP 5 Install MariaDB
-sudo apt-get install software-properties-common
-sudo apt install mariadb-server -y
-sudo mysql_secure_installation
+# Check and install MariaDB
+if ! is_installed mariadb-server; then
+    sudo apt-get update -y
+    sudo apt-get install software-properties-common -y
+    sudo apt-get install mariadb-server -y
+    sudo mysql_secure_installation
+fi
 
 # STEP 6 MySQL database development files
 sudo apt-get install libmysqlclient-dev -y
@@ -78,21 +92,23 @@ sudo service mysql restart
 
 sudo service mysql restart
 
-# STEP 8 Install Redis
-sudo apt-get install redis-server -y
+# STEP 8: Install Redis
+if ! is_installed redis-server; then
+    sudo apt-get update -y
+    sudo apt-get install redis-server -y
+fi
+# STEP 9: Install Node.js 14.X package
+if ! which node &> /dev/null; then
+    sudo apt-get remove nodejs -y
+    sudo apt-get remove npm -y
+    sudo apt-get update -y
+    sudo apt autoremove -y
+    sudo apt-get install curl -y
+    curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+    source ~/.profile
+    nvm install 14.15.0
+fi
 
-# STEP 9 Install Node.js 14.X package
-sudo apt-get remove nodejs -y
-sudo apt-get remove npm -y
-sudo apt-get update -y
-sudo apt autoremove -y
-which node
-
-sudo apt install curl
-curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-source ~/.profile
-nvm install 14.15.0   -y
-which node
 
 # STEP 10 Install Yarn
 sudo apt-get install npm -y
@@ -129,8 +145,19 @@ else
     exit 1
 fi
 # STEP 14 Initialize the frappe bench & install frappe latest version
-bench init --frappe-branch "$frappe_branch" frappe-bench
-
+# Initialize the frappe bench & install frappe latest version
+if ! bench init --frappe-branch "$frappe_branch" frappe-bench; then
+    echo "Failed to initialize frappe bench. Reinstalling Node.js..."
+    sudo apt-get remove nodejs -y
+    sudo apt-get remove npm -y
+    sudo apt-get update -y
+    sudo apt autoremove -y
+    sudo apt-get install curl -y
+    curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
+    source ~/.profile
+    nvm install 14.15.0
+    bench init --frappe-branch "$frappe_branch" frappe-bench
+fi
 cd frappe-bench/
 nohup bench start &
 
