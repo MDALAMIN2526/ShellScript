@@ -102,7 +102,8 @@ EOF
     sudo a2query -m ssl || sudo a2enmod ssl
     sudo a2query -m rewrite || sudo a2enmod rewrite
     sudo a2query -m headers || sudo a2enmod headers
-
+    sudo a2ensite nextcloud.conf
+    sudo a2dissite 000-default.conf
     # Install Certbot and obtain SSL certificate
     sudo apt update -y
     sudo apt install certbot python3-certbot-apache -y
