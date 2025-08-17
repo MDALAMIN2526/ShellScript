@@ -75,10 +75,24 @@ mkdir -p "$HOST_MOUNT" || error "Failed to create $HOST_MOUNT"
 chmod 1777 "$HOST_MOUNT"  # Sticky bit for shared dir
 
 # Download Alpine template if missing
-if ! pveam list local | grep -q "alpine"; then
+ALPINE_TEMPLATE="alpine-3.18-default_20230608_amd64.tar.xz"
+if ! pveam list local | grep -q "$ALPINE_TEMPLATE"; then
   echo "Downloading Alpine template..."
   pveam update || error "Failed to update templates"
-  pveam download local alpine-3.18-default_20230608_amd64.tar.xz || error "Failed to download Alpine"
+  
+  # List available templates and select Alpine
+  AVAILABLE_TEMPLATES=$(pveam available --section system)
+  if echo "$AVAILABLE_TEMPLATES" | grep -q "$ALPINE_TEMPLATE"; then
+    pveam download local "$ALPINE_TEMPLATE" || error "Failed to download Alpine template"
+  else
+    # Fallback to newest Alpine version if exact match not found
+    NEWEST_ALPINE=$(echo "$AVAILABLE_TEMPLATES" | grep "alpine" | head -1 | awk '{print $2}')
+    if [ -z "$NEWEST_ALPINE" ]; then
+      error "No Alpine templates available in your Proxmox storage"
+    fi
+    echo "Using newest available Alpine template: $NEWEST_ALPINE"
+    pveam download local "$NEWEST_ALPINE" || error "Failed to download Alpine template"
+  fi
 fi
 
 # Create container
