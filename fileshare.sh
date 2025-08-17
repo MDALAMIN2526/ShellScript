@@ -107,7 +107,7 @@ pct create "$CTID" \
   --memory 512 \
   --swap 512 \
   --net0 "name=eth0,bridge=vmbr0,ip=$CT_IP,gw=$GW" \
-  --mp0 "/$HOST_MOUNT,mp=$MOUNT_POINT" \
+  --mp0 "$HOST_MOUNT,$MOUNT_POINT" \
   --ostype alpine || error "Container creation failed"
 
 # Start container
