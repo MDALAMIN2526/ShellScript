@@ -98,7 +98,7 @@ fi
 # Create container
 echo "Creating container..."
 pct create "$CTID" \
-  local:vztmpl/alpine-3.18-default_20230608_amd64.tar.xz \
+  local:vztmpl/"$ALPINE_TEMPLATE" \
   --storage local-lvm \
   --hostname "$CT_NAME" \
   --password "$CT_PASSWORD" \
@@ -107,7 +107,7 @@ pct create "$CTID" \
   --memory 512 \
   --swap 512 \
   --net0 "name=eth0,bridge=vmbr0,ip=$CT_IP,gw=$GW" \
-  --mp0 "$HOST_MOUNT,$MOUNT_POINT" \
+  --mp0 "/$HOST_MOUNT,mp=$MOUNT_POINT" \
   --ostype alpine || error "Container creation failed"
 
 # Start container
