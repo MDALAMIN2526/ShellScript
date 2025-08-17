@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Proxmox Alpine LXC Samba/NFS Share Installer (Verified for Proxmox VE 9)
+# Proxmox Alpine LXC Samba/NFS Share Installer (Compatible with Debian-based Proxmox)
 # Run with: bash -c "$(curl -fsSL https://raw.githubusercontent.com/MDALAMIN2526/ShellScript/main/fileshare.sh)"
 
 set -eo pipefail
@@ -13,13 +13,18 @@ error() {
 }
 
 check_proxmox() {
-  if ! grep -qi "proxmox" /etc/os-release || ! command -v pvesh &>/dev/null; then
-    error "This script must run on a Proxmox VE host (pvesh not found or OS mismatch)."
-  fi
+  # Check for Proxmox-specific commands instead of OS detection
+  local proxmox_commands=(pvesh pct pveam)
+  for cmd in "${proxmox_commands[@]}"; do
+    if ! command -v "$cmd" &>/dev/null; then
+      error "Command '$cmd' not found. Are you sure this is a Proxmox host?"
+    fi
+  done
+  echo "✓ Verified Proxmox host (Proxmox commands available)"
 }
 
 check_deps() {
-  for cmd in pvesh curl openssl; do
+  for cmd in curl openssl; do
     if ! command -v "$cmd" &>/dev/null; then
       error "Missing required command: $cmd"
     fi
@@ -30,7 +35,7 @@ check_deps() {
 clear
 echo "=== Proxmox Samba/NFS Share Setup ==="
 
-# Verify Proxmox VE environment
+# Verify environment
 check_proxmox
 check_deps
 
