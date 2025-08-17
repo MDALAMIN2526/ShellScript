@@ -95,9 +95,9 @@ if ! pveam list local | grep -q "$ALPINE_TEMPLATE"; then
   fi
 fi
 
-# Create container
+# Create container with universal mount point syntax
 echo "Creating container..."
-pct create "$CTID" \
+if pct create "$CTID" \
   local:vztmpl/"$ALPINE_TEMPLATE" \
   --storage local-lvm \
   --hostname "$CT_NAME" \
@@ -107,8 +107,25 @@ pct create "$CTID" \
   --memory 512 \
   --swap 512 \
   --net0 "name=eth0,bridge=vmbr0,ip=$CT_IP,gw=$GW" \
-  --mp0 "$HOST_MOUNT,$MOUNT_POINT" \
-  --ostype alpine || error "Container creation failed"
+  --mp0 "/$HOST_MOUNT,mp=$MOUNT_POINT" \
+  --ostype alpine; then
+  echo "Container created successfully"
+else
+  # Fallback to old syntax if new syntax fails
+  echo "Trying alternative mount point syntax..."
+  pct create "$CTID" \
+    local:vztmpl/"$ALPINE_TEMPLATE" \
+    --storage local-lvm \
+    --hostname "$CT_NAME" \
+    --password "$CT_PASSWORD" \
+    --unprivileged 1 \
+    --cores 1 \
+    --memory 512 \
+    --swap 512 \
+    --net0 "name=eth0,bridge=vmbr0,ip=$CT_IP,gw=$GW" \
+    --mp0 "/$HOST_MOUNT,$MOUNT_POINT" \
+    --ostype alpine || error "Container creation failed with both syntax attempts"
+fi
 
 # Start container
 pct start "$CTID" || error "Failed to start container"
