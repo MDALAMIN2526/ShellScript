@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Proxmox Alpine LXC Samba/NFS Share Installer (Secure Version)
+# Proxmox Alpine LXC Samba/NFS Share Installer (Verified for Proxmox VE 9)
 # Run with: bash -c "$(curl -fsSL https://raw.githubusercontent.com/MDALAMIN2526/ShellScript/main/fileshare.sh)"
 
 set -eo pipefail
@@ -10,6 +10,12 @@ exec > >(tee /var/log/fileshare-setup.log) 2>&1
 error() {
   echo -e "\n❌ Error: $1" >&2
   exit 1
+}
+
+check_proxmox() {
+  if ! grep -qi "proxmox" /etc/os-release || ! command -v pvesh &>/dev/null; then
+    error "This script must run on a Proxmox VE host (pvesh not found or OS mismatch)."
+  fi
 }
 
 check_deps() {
@@ -24,10 +30,9 @@ check_deps() {
 clear
 echo "=== Proxmox Samba/NFS Share Setup ==="
 
-# Check if running on Proxmox
-if ! grep -q "proxmox" /etc/issue; then
-  error "This script must run on a Proxmox host."
-fi
+# Verify Proxmox VE environment
+check_proxmox
+check_deps
 
 # Prompt for credentials
 read -rp "Enter username for Samba/NFS access: " SHARE_USER
